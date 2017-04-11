@@ -25,31 +25,52 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         tvInfo = (TextView) findViewById(R.id.tvInfo);
+        btnStart = (Button) findViewById(R.id.btnStart);
+        handler = new Handler() {
+            @Override
+          public void handleMessage(android.os.Message msg) {
+              String message = getString(R.string.download_files) + msg.what;
+              //Обновление TextView
+              tvInfo.setText(message);
+              if (msg.what == 10) {
+                  btnStart.setEnabled(true);
+              }
+          };
+        };
     }
 
 
     public void onClickButton(View view) {
 
-        String message = "";
-
         switch (view.getId()) {
 
             case R.id.btnStart :
 
-                for (int index = 1; index <= 10; index++) {
+                btnStart.setEnabled(false);
+                Thread thread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
 
-                    message = getString(R.string.download_files) + index;
-                    //Это долгий процесс
-                    downloadFile();
-                    //Обновление TextView
-                    tvInfo.setText(message);
-                    //Запись в лог
-                    Log.d(LOG_TAG, message);
+                        String message = "";
 
-                }
+                        for (int index = 1; index <= 10; index++) {
+
+                            message = getString(R.string.download_files) + index;
+                            //Это долгий процесс
+                            downloadFile();
+                            //Обновление TextView
+//                            tvInfo.setText(message);
+                            handler.sendEmptyMessage(index);
+                            //Запись в лог
+                            Log.d(LOG_TAG, message);
+
+                        }
+                    }
+                });
+                thread.start();
                 break;
             case R.id.btnTest :
-                message = "test";
+                String message = "test";
                 Log.d(LOG_TAG, message);
                 break;
             default:
